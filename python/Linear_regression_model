@@ -1,0 +1,139 @@
+## Linear Regression Project ##
+
+# The project is about an Ecommerce company specializing in clothing sales. They offer in-store style consultations 
+# and also operate online through a mobile app and website.
+
+# The task is to assist the company in determining whether to prioritize improving their mobile app or website. 
+# The data are fictional customer data, with no real credit card information or emails.
+
+# The dataset contains customer info, suchas Email, Address, and their color Avatar. It also has numerical value columns:
+# - Avg. Session Length: Average session of in-store style advice sessions.
+# - Time on App: Average time spent on App in minutes
+# - Time on Website: Average time spent on Website in minutes
+# - Length of Membership: How many years the customer has been a member.
+# - Yearly Amount Spent: The amount of money each customer spent in a year.
+
+
+# importing necessary libraries for data analysis
+
+import pandas as pd
+import numpy as np
+
+# importing necessary libraries for data visualization
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+# reading the csv file using pandas
+
+df = pd.read_csv('../data/Ecommerce Customers')
+
+# checking the head of the dataframe
+
+df.head()
+
+# checking the .info() --- the dataset contains no null values
+
+df.info()
+
+# checking the .describe() for some descriptive statistics
+
+df.describe()
+
+# EDA (Explanatory Data Analysis)
+
+# only using the columns with numeric data
+
+sns.jointplot(x='Time on Website', y='Yearly Amount Spent', data=df);
+
+# doesn't show strong correlation between 'Time on Website' and 'Yearly Amount Spent'
+
+sns.jointplot(x='Time on App', y='Yearly Amount Spent', data=df);
+
+# the correlation looks better between 'Time on App' and 'Yearly Amount Spent'
+
+sns.jointplot(x='Time on App', y='Length of Membership', data=df, kind='hex');
+
+# exploring the types of relationships across the entire data set.
+
+sns.pairplot(df);
+
+# based on this plot 'Length of Membership' looks to be the most correlated feature with 'Yearly Amount Spent'
+
+# creating a linear model of 'Yearly Amount Spent' vs. 'Length of Membership'
+
+sns.lmplot(x='Length of Membership', y='Yearly Amount Spent', data=df);
+
+# Training and Testing Data
+
+df.columns
+
+# setting variable X equal to the numerical features of the customers and 
+# a variable y equal to the "Yearly Amount Spent" column
+
+X = df[['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership']]
+
+y = df['Yearly Amount Spent']
+
+# scikit-learn library
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+# training the model
+
+from sklearn.linear_model import LinearRegression
+
+# creating an instance of a LinearRegression()
+
+lm = LinearRegression()
+
+# training/fitting lm on the training data
+
+lm.fit(X_train,y_train)
+
+# printing the coefficients of the model
+
+lm.coef_
+
+# predicting test data
+
+predictions = lm.predict(X_test)
+
+# creating a scatterplot of the real test values versus the predicted values
+
+plt.scatter(y_test,predictions);
+
+# Model Evaluation
+
+# evaluating the model performance by calculating the residual sum of squares and the explained variance score (R^2)
+
+from sklearn import metrics
+
+print('MAE:', metrics.mean_absolute_error(y_test, predictions))
+print('MSE:', metrics.mean_squared_error(y_test, predictions))
+print('RMSE:', np.sqrt(metrics.mean_squared_error(y_test, predictions)))
+
+metrics.explained_variance_score(y_test, predictions)
+
+# about 99% of the variance explained by the model (very good fit)
+
+# Residuals
+
+# exploring the residuals
+
+# plotting a histogram of the residuals and make sure it looks normally distributed
+
+sns.distplot((y_test-predictions),bins=50);
+
+# Conclusion
+coeff_df = pd.DataFrame(lm.coef_,X.columns,columns=['Coefficient'])
+coeff_df
+
+# this means that when every other feature remains fixed, 1 unit increase on the current feature is associated
+# with a corresponding increase of the amount of the coefficient column.
+
+# This data show that the App works much better than the Website. 
+# Wether the company should focus more on the App or on the website depends on the company strategy 
